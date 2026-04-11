@@ -1,0 +1,747 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04020a;--bg2:#080412;--bg3:#0c0618;
+  --red:#9b0000;--red2:#cc1100;--red3:#ff2200;
+  --gold:#6a4a1a;--gold2:#a07030;
+  --txt:#c0a880;--txt2:#8a7060;--txt3:#4a3020;
+  --border:#1a0c06;--border2:#2e1408;
+}
+body,html{background:transparent;font-family:'Noto Serif SC','SimSun',serif;}
+#app{background:var(--bg);color:var(--txt);min-height:600px;position:relative;overflow:hidden;}
+/* scanlines */
+#app::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(transparent,transparent 2px,rgba(0,0,0,0.12) 2px,rgba(0,0,0,0.12) 4px);pointer-events:none;z-index:0;}
+/* blood drip top */
+.blood-top{position:absolute;top:0;left:0;right:0;height:24px;z-index:10;overflow:hidden;}
+.drop{position:absolute;top:0;width:3px;background:linear-gradient(#6a0000,#cc1100);border-radius:0 0 3px 3px;animation:drip linear infinite;}
+@keyframes drip{0%{height:0;opacity:0}20%{opacity:1}100%{height:24px;opacity:.7}}
+
+/* PAGE FLIP */
+#flipper{perspective:1200px;width:100%;position:relative;z-index:2;}
+.page{
+  width:100%;min-height:560px;
+  transform-style:preserve-3d;
+  transition:transform .7s cubic-bezier(.77,0,.18,1);
+  transform-origin:left center;
+}
+.page.flip-out{animation:flipOut .65s forwards cubic-bezier(.77,0,.18,1);}
+.page.flip-in{animation:flipIn .65s forwards cubic-bezier(.22,1,.36,1);}
+@keyframes flipOut{0%{transform:rotateY(0)}100%{transform:rotateY(-90deg);opacity:0}}
+@keyframes flipIn{0%{transform:rotateY(90deg);opacity:0}100%{transform:rotateY(0);opacity:1}}
+.inner{max-width:660px;margin:0 auto;padding:20px 14px 30px;}
+
+/* LOGO */
+.logo-wrap{text-align:center;padding:28px 0 10px;}
+.logo-main{font-size:32px;font-weight:700;letter-spacing:6px;color:var(--red2);text-shadow:0 0 24px #660000,0 0 3px #ff0000;line-height:1;}
+.logo-sub{font-size:11px;letter-spacing:10px;color:var(--txt3);margin-top:5px;}
+.hdiv{height:1px;background:linear-gradient(90deg,transparent,#550000,#880000,#550000,transparent);margin:12px 0;}
+/* FRAME */
+.fm{border:1px solid var(--border2);background:rgba(6,2,12,.92);padding:16px 14px;position:relative;margin-bottom:14px;}
+.fm .c{position:absolute;color:#2a1006;font-size:9px;}
+.c-tl{top:5px;left:7px}.c-tr{top:5px;right:7px}.c-bl{bottom:5px;left:7px}.c-br{bottom:5px;right:7px}
+.spd{color:#1e0c06;letter-spacing:3px;font-size:11px;text-align:center;margin:5px 0;}
+.intro-p{font-size:13px;line-height:2.1;color:var(--txt2);text-align:center;}
+.intro-p em{color:#880000;font-style:normal;}
+/* START BTN */
+.btn-start{display:block;width:100%;padding:13px;background:var(--bg);border:1px solid var(--red);color:var(--red2);font-size:15px;font-family:'Noto Serif SC',serif;letter-spacing:5px;cursor:pointer;margin-top:12px;transition:all .2s;text-align:center;position:relative;overflow:hidden;}
+.btn-start::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(150,0,0,.08) 50%,transparent 100%);transform:translateX(-100%);transition:transform .4s;}
+.btn-start:hover::after{transform:translateX(100%);}
+.btn-start:hover{background:#10020a;color:var(--red3);border-color:var(--red2);text-shadow:0 0 8px #880000;}
+/* PROGRESS */
+.prog-wrap{margin-bottom:12px;}
+.prog-bar{width:100%;height:3px;background:#0e0608;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#330000,var(--red2));transition:width .5s;}
+.prog-txt{font-size:10px;color:var(--txt3);text-align:right;margin-top:3px;letter-spacing:2px;}
+/* QUESTION */
+.q-num{font-size:10px;color:var(--txt3);letter-spacing:4px;margin-bottom:6px;}
+.q-txt{font-size:13.5px;line-height:2;color:var(--txt);margin-bottom:12px;border-left:2px solid #660000;padding-left:12px;position:relative;}
+.q-dims{font-size:10px;color:#1e0c06;letter-spacing:3px;margin-bottom:10px;}
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:7px;}
+.opt{
+  padding:10px 13px;background:var(--bg);border:1px solid var(--border);
+  color:var(--txt3);font-size:12px;font-family:'Noto Serif SC',serif;
+  cursor:pointer;text-align:left;line-height:1.9;transition:all .15s;
+  position:relative;overflow:hidden;
+}
+.opt::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);transition:width .2s;opacity:.15;}
+.opt:hover::before{width:100%;}
+.opt:hover{border-color:#550000;color:var(--txt);}
+.opt.dark{color:#280e04;border-color:#120804;}
+.opt.dark:hover{color:#cc3300;border-color:#550000;}
+.opt.dark .dk-mark{color:#440800;margin-right:4px;transition:color .15s;}
+.opt.dark:hover .dk-mark{color:#880000;}
+
+/* ANIMATED ICONS per question */
+.q-anim{font-size:22px;margin-bottom:8px;min-height:30px;text-align:right;padding-right:4px;}
+.q-anim span{display:inline-block;}
+.bounce{animation:bnc .9s infinite alternate;}
+.shake{animation:shk .5s infinite;}
+.spin{animation:spn 3s linear infinite;}
+.pulse{animation:pls 1.5s infinite alternate;}
+.sway{animation:swy 2s infinite ease-in-out;}
+.float{animation:flt 2.5s infinite ease-in-out;}
+@keyframes bnc{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}
+@keyframes shk{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes spn{to{transform:rotate(360deg)}}
+@keyframes pls{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.15);opacity:1}}
+@keyframes swy{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* RESULT */
+.res-name{font-size:34px;font-weight:700;color:var(--red2);letter-spacing:5px;text-shadow:0 0 14px #550000;margin:8px 0 2px;}
+.res-title{font-size:12px;color:var(--gold);letter-spacing:4px;margin-bottom:10px;}
+/* CHAR IMG GALLERY */
+.char-gallery{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0;}
+.char-img-wrap{position:relative;overflow:hidden;}
+.char-img-wrap.main-img{flex:0 0 160px;}
+.char-img-wrap.side-img{flex:0 0 90px;}
+.char-img{width:100%;display:block;border:1px solid #1e0a04;filter:sepia(20%) contrast(1.05) brightness(0.92);transition:filter .3s;image-rendering:auto;}
+.char-img:hover{filter:sepia(0%) contrast(1.1) brightness(1);}
+.char-img-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(4,2,10,.8));pointer-events:none;}
+.no-img{width:100%;aspect-ratio:1/1;background:#0a0412;display:flex;align-items:center;justify-content:center;border:1px solid #1a0806;}
+.ascii-art{font-size:8px;line-height:1.3;font-family:'Courier New',monospace;color:#2a1208;white-space:pre;}
+/* RESULT DESC */
+.res-desc{font-size:12.5px;line-height:2.1;color:var(--txt2);margin:12px 0;}
+.res-desc p{margin-bottom:10px;}
+.res-desc .quote{border-left:2px solid #440000;padding-left:10px;color:#5a2a12;font-size:11.5px;margin:8px 0;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+.tag{padding:2px 9px;border:1px solid #2a0e06;font-size:10px;color:#3a1808;letter-spacing:2px;}
+/* DIMS */
+.dim-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.dim-name{font-size:10px;color:#3a1e0a;width:80px;flex-shrink:0;}
+.dim-bg{flex:1;height:5px;background:#0e0608;}
+.dim-fill{height:100%;background:linear-gradient(90deg,#330000,var(--red2));width:0;transition:width 1.3s ease-out;}
+.dim-pct{font-size:10px;color:#660000;width:30px;text-align:right;}
+/* BOTTOM BTN */
+.btn-sm{display:inline-block;padding:9px 22px;background:var(--bg);border:1px solid var(--border2);color:var(--txt3);font-size:11px;font-family:'Noto Serif SC',serif;letter-spacing:3px;cursor:pointer;transition:all .2s;}
+.btn-sm:hover{border-color:var(--red);color:var(--red2);}
+.px-strip{font-size:7px;color:#160806;text-align:center;letter-spacing:1px;overflow:hidden;white-space:nowrap;user-select:none;}
+/* FLICKER CANDLE */
+.flk{animation:flk 2s infinite alternate;display:inline-block;}
+@keyframes flk{0%{opacity:.55;text-shadow:0 0 3px #cc2200}100%{opacity:1;text-shadow:0 0 12px #ff4400,0 0 4px #ff2200}}
+/* MUSIC BTN */
+#mBtn{position:fixed;bottom:14px;right:14px;z-index:999;width:34px;height:34px;background:var(--bg);border:1px solid var(--border2);color:var(--txt3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:serif;}
+#mBtn.on{color:var(--red2);border-color:var(--red);animation:mPls 2s infinite alternate;}
+@keyframes mPls{0%{box-shadow:0 0 0 0 #66000000}100%{box-shadow:0 0 8px 2px #66000066}}
+/* NOTE FLOAT */
+.note{position:fixed;pointer-events:none;z-index:998;font-size:12px;color:#550000;animation:noteFloat 2.5s forwards ease-out;}
+@keyframes noteFloat{0%{opacity:0;transform:translateY(0) scale(.8)}20%{opacity:.7}100%{opacity:0;transform:translateY(-80px) scale(1.1)}}
+</style>
+
+<div id="app">
+  <div class="blood-top" id="bloodTop"></div>
+  <div id="flipper"><div class="page" id="page"><div class="inner" id="inner"></div></div></div>
+</div>
+<button id="mBtn" onclick="toggleMusic()">♪</button>
+<audio id="bgm" loop></audio>
+
+<script>
+const BASE = 'https://raw.githubusercontent.com/durou1/blacksoul-/main/';
+const BGM = BASE + encodeURIComponent('草莓酱紫 - 标题.爱丽丝 [mqms2].ogg');
+
+const DIMS=[
+  {id:'K',name:'黑暗承受'},
+  {id:'L',name:'欲望之焰'},
+  {id:'B',name:'羁绊执念'},
+  {id:'S',name:'杀戮本能'},
+  {id:'M',name:'狂气深度'},
+  {id:'R',name:'轮回意志'},
+];
+
+/* ---- CHARS ---- */
+const CHARS=[
+  {
+    id:'LORDE', name:'洛德', title:'地狱王子 ∙ 大木偶剧场之主',
+    cond:s=>s.M>=16||s.S>=16,
+    imgs:[{f:'地狱王子洛德.jpg',main:true}],
+    tags:['剧作家','恐惧王子','扭曲父爱','疯狂美学','宿敌'],
+    desc:[
+      '童话？不过是裹着屎的糖罢了。他端坐于大木偶剧场的幽暗包厢，猫头鹰面具后的眼睛看穿了所有谎言——那些被糖衣包裹的谎言，那些叫做"幸福结局"的伪善。',
+      '他是地狱来的王子，是恐怖的艺术家，是将鲜血与绝望写入剧本的天才。他的每一出戏都是一把刀，刺向那些相信童话的愚蠢灵魂。',
+      '"虚伪的幸福，不如彻底的崩坏。" 他如此相信，也如此创作——直到Guignol，他的"女儿"，他毕生的杰作，彻底拒绝了他。那一刻，天才跌入了他自己写就的深渊。',
+      '"格林，你这种三流童话作者也配站在我面前？" 他嘲讽你，诅咒你，用千种语言侮辱你——但在战斗最激烈的瞬间，他误认了你的脸，颤抖着喊出那个名字：\n"……Guignol，我的女儿，你终于回来了。"\n然后是漫长的沉默，和一声彻底崩塌的叹息。\n"啊……原来不是你。搞错了。"',
+    ],
+    quote:'格林，你和我……其实是一路人。',
+    ascii:`  /\\(o o)/\\
+ (  猫头鹰  )
+  \\礼服斗篷/
+    | ✦ |
+   /飞刀\\`
+  },
+  {
+    id:'REIK', name:'蕾克', title:'小红帽 ∙ 危险的孩子',
+    cond:s=>s.S>=14&&s.K>=10,
+    imgs:[{f:'蕾克1.jpg',main:true},{f:'蕾克2.jpg'},{f:'蕾克3.jpg'}],
+    tags:['不安定','致命','三无','独行者'],
+    desc:[
+      '血浸黑衫，大镰无声。她不是没有情感，只是情感从来不是她行动的理由。杀人对她而言如同呼吸——不需要愤怒，不需要理由，甚至不需要回忆。',
+      '她曾经在篝火旁对你露出孩子气的笑，那笑容让整片废墟都短暂地温暖了一瞬。然后她头也不回地离开了，去追杀那个神秘的存在，只留下一封信——',
+      '"如果有一天我能回来……请把我当作一个普通的女孩对待。"',
+    ],
+    quote:'不安定的危险孩子，对杀人没有任何犹豫。',
+    ascii:`  ,---.
+ / ● ● \\
+ \\ ▽   /
+  '--∧--'
+   |▓|`
+  },
+  {
+    id:'DOROTHY', name:'多萝西', title:'魔女 ∙ 最后的传承',
+    cond:s=>s.L>=14&&s.B>=10,
+    imgs:[{f:'多萝西1.jpg',main:true},{f:'多萝西2.jpg'},{f:'多萝西3.gif'}],
+    tags:['魔女','智慧','孤独','母性的毁灭'],
+    desc:[
+      '这个世界最后的魔女，孤独地守护着消逝中的古老咒语。她的高傲源于力量，但在你面前，她愿意折下那份骄矜，以她独特的方式陪伴你走过最黑暗的路。',
+      '她用了一生教导，却没有一个弟子能够真正传承她的一切。稻草人、铁皮人、狮子——她的旧徒弟们早已变成了需要你亲手清除的障碍。',
+      '她最后的结局是用生命延续了下一个故事。诞下魔兽之后，她在某个寻常的清晨悄然消逝——没有悲壮，没有仪式。也许，这是她能给出的最温柔的答案。',
+    ],
+    quote:'贵安，游荡不定的黑之魂。',
+    ascii:`  /\\★/\\
+ (  ≡  )
+ |∞∞  |
+  \\___/`
+  },
+  {
+    id:'JEANNE', name:'贞德', title:'圣骑士 ∙ 烈火中的信仰',
+    cond:s=>s.R>=14&&s.S>=8,
+    imgs:[{f:'贞德1.jpg',main:true}],
+    tags:['信仰','不屈','圣骑士','轮回的火焰'],
+    desc:[
+      '第一次登场便被烈焰焚成灰烬，却仍能从灰中复活归来。这不是奇迹——这是她本来的样子。她的信仰比肉身更坚不可摧，比火焰更炽热，也比这个世界的黑暗更持久。',
+      '在罪恶横流的土地上，她始终持剑而立，以圣洁之名承受一切污秽。她爱你，用骑士的方式——无声、坚定、不计代价。',
+      '即便你罪业深重，她也会在你最需要的时刻出现……然后再次被你亲手推入深渊。轮回如此，她从未抱怨。',
+    ],
+    quote:'我以信仰为盾，以牺牲为剑。',
+    ascii:`   十
+  /|\\
+ /_|_\\
+| ⊕  |
+ \\___/`
+  },
+  {
+    id:'ALICE_L', name:'爱丽丝·利德尔', title:'图书馆守望者 ∙ 终焉之人',
+    cond:s=>s.M>=14&&s.K>=12,
+    imgs:[{f:'爱丽丝利德尔1.jpg',main:true}],
+    tags:['黑幕','轮回见证者','空洞的温柔','真相之人'],
+    desc:[
+      '她坐在图书馆最深处，等待着每一个格林的到来。她见证了所有的轮回，知晓所有的真相，却永远保持着那个温柔又空洞的微笑。书架上每一本童话，都曾经是一条活生生的生命。',
+      '"先生？我们会再次相见的。"——这句话，她对每一个格林说过，不知多少次。承诺，还是诅咒？也许两者都是。',
+      '你必须亲手杀死所有的同伴，杀死图书馆中的她，才能填满所有的书架，才能看到这个世界真正的终点。她早就知道了，从你第一次推开图书馆的门的那一刻起。',
+      '"——你也和我一起来吧。"',
+    ],
+    quote:'我为了再一次握住她的手而伸出手臂，她却在漆黑的世界里微笑着一动也不动。',
+    ascii:`  _(☽)_
+ /∴ ∵ \\
+|∅   ∅|
+ \\____/`
+  },
+  {
+    id:'MIRANDA', name:'米兰达', title:'黑之裁判 ∙ 战场上的野兽',
+    cond:s=>s.S>=12&&s.L>=12,
+    imgs:[{f:'米兰达1.jpg',main:true}],
+    tags:['战斗狂','矛盾的爱','黑之裁判','狂烈'],
+    desc:[
+      '她追杀你，也爱着你。这两件事在她心中毫不矛盾——她的世界只有战斗与强者，而你证明了自己是值得被她追逐的存在。追击是她表达敬意的方式，也是她表达爱意的方式。',
+      '她陪你走过最黑暗的路，视杀戮为荣耀，视战斗为情书。她本来就是生来战斗的，她知道这一点，也从未试图改变这一点。',
+      '她的死亡注定在战场之上，在毁灭帝国的最后一战中——她不会接受任何其他方式的结局。在她倒下的那一刻，你听见了新生命到来的第一声啼哭。',
+    ],
+    quote:'生来就是战斗狂的她，最后会在一声胎儿的哭声中永远地失去了她。',
+    ascii:` /\\⚔/\\
+(▼▼  )
+|█████|
+ \\___/`
+  },
+  {
+    id:'LIEVRE', name:'莉耶芙', title:'精灵 ∙ 作者 ∙ 黑幕的黑幕',
+    cond:s=>s.M>=12&&s.B>=10,
+    imgs:[{f:'莉耶芙1.jpg',main:true}],
+    tags:['精灵','作者','黑幕的黑幕','嘻嘻'],
+    desc:[
+      '嘻嘻。',
+      '她是精灵，是同伴，是向导，是黑幕，是作者，是玩弄格林于股掌间的存在，也是最后独坐圣森等待你的那个人。她的笑声响彻仙境每一个角落，像春风，像蛇吻。',
+      '当你以为终于看透了这个世界所有的真相，才发现她的手指依然轻轻拨弄着每一根线——你以为的真相，也是她写就的剧本的一部分。',
+      '"嘻嘻嘻……这不过是刚开始而已。人家是作者。是登场人物。是黑幕。又或者是公主大人……嘻嘻……嘻嘻嘻……"',
+    ],
+    quote:'你以为是人家吧！其实是莉耶芙玩偶哦！',
+    ascii:` °˖(⁰▿⁰)˖°
+  嘻嘻嘻`
+  },
+  {
+    id:'ELRUMA', name:'艾露玛', title:'卖火柴的女孩 ∙ 灰烬之中的她',
+    cond:s=>s.K>=12&&s.L>=10&&s.B<=6,
+    imgs:[{f:'艾露玛1.jpg',main:true}],
+    tags:['扭曲的纯洁','火焰','残忍','灰烬女孩'],
+    desc:[
+      '她卖的火柴，是用人类制成的。她的笑容干净如雪，双手却永远带着火与灰的气息。在这个将一切扭曲的世界里，她学会了用最温柔的面孔掩盖最彻底的残忍。',
+      '你帮她杀死了她的母亲——那个让她永远点燃火柴、永远在寒夜中燃烧的女人。她因此追随你，眼神干净得像什么都没有发生。',
+      '这究竟是解脱还是诅咒？她自己也不知道。也许她从来不需要知道。',
+    ],
+    quote:'火柴燃尽的瞬间，她总是在微笑。',
+    ascii:` (° °)
+ | ▲ |
+/|🔥|\\
+ |___|`
+  },
+  {
+    id:'HISSHA', name:'希夏', title:'白雪姬 ∙ 玻璃棺中的长眠',
+    cond:s=>s.B>=12&&s.M>=8&&s.R<=8,
+    imgs:[{f:'希夏1.jpg',main:true}],
+    tags:['沉眠','玻璃棺','麻木的温柔','生死模糊'],
+    desc:[
+      '她在深眠与清醒之间徘徊，从未完全属于这个世界，也从未彻底离开它。有人说她在等待一个吻，但玻璃棺中冰冷的她，也许早已忘记自己究竟在等待什么。',
+      '她见过太多的死亡，以至于生与死的边界对她而言早已模糊成一片灰色。她的温柔是真实的，她的麻木也是真实的——它们共存于同一张脸上，从不相互干扰。',
+      '当你终于走到她的棺前，她睁开眼睛，用那种古老而空洞的声音说："你来了。" 好像她早就知道，好像她等待这一刻已经等了很久，很久。',
+    ],
+    quote:'我不知道我是在睡觉，还是已经死了。',
+    ascii:` ___
+|zzz|
+| ⌒ |
+|___|
+ 棺`
+  },
+  {
+    id:'LORINA', name:'罗丽娜', title:'爱丽丝之姐 ∙ 边界之外的清醒者',
+    cond:s=>s.M>=10&&s.K>=8&&s.R>=10,
+    imgs:[{f:'罗丽娜1.jpg',main:true}],
+    tags:['边界之人','清醒的旁观者','被遗忘的姐姐'],
+    desc:[
+      '她是爱丽丝故事开始之前的那个人，也是故事结束之后唯一还坐在河边的那个人。她看着妹妹坠入兔子洞，选择了留在现实——或者说，她从未有机会跟随。',
+      '在两个世界的边界，她存在于所有人的盲区，清醒地目睹着每一轮疯狂的轮回，记录着每一个格林的走来与消亡。',
+      '她不属于任何一个故事，却见证了所有故事。也许，这才是这个世界里最孤独的存在方式。',
+    ],
+    quote:'我只是坐在这里，看着你们一次次走进那个洞。',
+    ascii:` ~(⌒▽⌒)~
+  边界`
+  },
+  {
+    id:'BAPHOMET', name:'巴风特', title:'黑之法官 ∙ 审判的终点',
+    cond:s=>s.S>=16,
+    imgs:[{f:'巴风特1.jpg',main:true}],
+    tags:['审判','黑之法官','终焉','冷酷'],
+    desc:[
+      '他端坐于黑暗法庭的最深处，以亘古的冷漠注视着每一个罪业缠身的灵魂。他不杀人——他只判决。而那判决，比任何刀刃都更致命，比任何死亡都更彻底。',
+      '在这个世界里，所谓正义早已腐烂殆尽，道德沦为权贵的玩物。但他仍然履行着那份职责，无论那是否还有任何意义，无论还有没有人真的相信公正。',
+      '你来到他面前，带着所有的罪业，带着所有的血与火。他注视着你，漫长地沉默，然后开口：\n"格林，你究竟是什么？"',
+    ],
+    quote:'罪与罚，终将有个了断。',
+    ascii:`  /\\ /\\
+ (⊗ ⊗ )
+ |▓▓▓▓|
+  \\___/
+  审判`
+  },
+  {
+    id:'CHESHIRE', name:'柴郡猫', title:'消失的笑容 ∙ 谜语的主人',
+    cond:s=>s.M>=10&&s.L>=10&&s.S<=8,
+    imgs:[{f:'柴郡猫1.jpg',main:true},{f:'柴郡猫2.jpg'},{f:'柴郡猫.jpeg'}],
+    tags:['谜语','消失','笑容','不可信赖'],
+    desc:[
+      '他的身体可以消失，但那个笑容永远悬浮在原地——比身体更真实，比语言更诚实，也比你的判断更持久。',
+      '他从不给出答案，只给你越来越深的问题，引你走进迷宫的更深处，直到你忘记了自己最初想去哪里，忘记了自己究竟是谁。',
+      '"我们都是疯子，"他懒懒地说，那个笑容在黑暗中微微颤动，"区别只在于，你知不知道这一点。"',
+    ],
+    quote:'这里每个人都是疯子，否则你怎么会在这里？',
+    ascii:` =^._.^=
+( · · )
+  笑容`
+  },
+  {
+    id:'BILL', name:'比尔', title:'烟囱蜥蜴 ∙ 永远被推进去的那个',
+    cond:s=>s.R>=10&&s.S<=6&&s.K<=8,
+    imgs:[{f:'比尔1.jpg',main:true}],
+    tags:['炮灰命','不死精神','乐观','被遗忘的勇者'],
+    desc:[
+      '每当需要有人被送进黑暗的烟囱，每当没有人愿意去做的事需要有人去做——就会有人去找比尔。他是公认的全场最佳炮灰，是每一场灾难的自愿牺牲者，是被整个仙境理所当然遗忘的名字。',
+      '他总是被推进去，总是从另一端飞出来，拍拍身上的灰，短暂地怀疑了一下人生，然后再次站起来。这不是英雄主义，这只是习惯，也可能只是遗忘了痛苦的本能。',
+      '也许轮回对他而言，只是另一根更长的烟囱。他不在乎。他早就不在乎了。',
+    ],
+    quote:'又是我。怎么又是我。',
+    ascii:` (°ω°)
+  比尔
+ /___\\`
+  },
+  {
+    id:'ALICE01', name:'爱丽丝01', title:'名字本身 ∙ 规则的化身',
+    cond:s=>s.M>=16,
+    imgs:[{f:'爱丽丝011.jpg',main:true}],
+    tags:['名字本身','规则','禁忌的存在','消失'],
+    desc:[
+      '她不是爱丽丝，她是"爱丽丝"这个名字所承载的一切。所有叫做"爱丽丝"的存在都与她相连，所有不思议之国的规则都从她而来，又将回归于她。',
+      '她存在于语言的边界，存在于命名的瞬间，存在于每一次有人开口说出那个名字的刹那——然后在回声散尽之前消失。',
+      '坏路线中她想不起自己的名字，在老师说出"爱丽丝"的瞬间，她被不知名的力量消灭。因为她从未被允许存在于那个名字之外。',
+    ],
+    quote:'你是谁？……我是……爱丽……',
+    ascii:` [0 1]
+/∞∞∞\\
+|爱丽丝|
+ \\___/`
+  },
+  {
+    id:'DODO', name:'愚鸟渡渡', title:'比赛主持人 ∙ 没有终点的奔跑',
+    cond:s=>s.R>=8&&s.M<=6&&s.L<=6,
+    imgs:[{f:'愚鸟渡渡1.jpg',main:true},{f:'愚鸟渡渡2.jpg'}],
+    tags:['比赛主持','虚假的胜利','清醒的孤独'],
+    desc:[
+      '他宣布所有人都是赢家，但没有人真的赢得了任何东西。他主持着那场永远不会结束的比赛，颁发着没有意义的奖品，用一种奇异的快乐维持着这个世界表面的秩序。',
+      '在彻底疯狂的仙境里，他是最清醒的那个——正因如此，他也是最孤独的那个。清醒是一种孤独的特权，而他不知道是否还想要这份特权。',
+      '比赛继续，他继续主持，继续颁奖，继续微笑。没有人问他是否累了。',
+    ],
+    quote:'所有人都赢了！所有人都……赢了。',
+    ascii:` (>_<)
+  渡渡
+ 飞不起来`
+  },
+  {
+    id:'GRIM', name:'格林', title:'不死的轮回者 ∙ 故事的主角',
+    cond:s=>true,
+    imgs:[{f:'格林1.jpg',main:true},{f:'格林2.png'}],
+    tags:['主角','不死','轮回','沉默的意志'],
+    desc:[
+      '你失去了名字，失去了记忆，失去了人性——但你依然在每一次轮回中点燃篝火，拾起武器，继续前行。没有神明为你许诺，没有预言为你铺路，没有任何理由支撑着这份坚持。',
+      '一路上，你亲手杀死了爱你的人，亲手毁灭了你试图拯救的一切。外神嘲笑你，命运践踏你，真相一次次告诉你：所有努力都是虚妄。',
+      '但就算失去记忆和灵魂，甚至失去人性，你依然在每一次轮回后，向这个没有出路的世界发起厮杀。\n没有人能解释这是为什么。\n也许，这就已经足够了。',
+    ],
+    quote:'是啊，一定会持续下去的。',
+    ascii:` [BLACK]
+  格林
+[SOULS]
+YOU DIED`
+  },
+];
+
+/* ---- QUESTIONS ---- */
+const QS=[
+  {
+    id:0, dims:'杀戮本能 × 黑暗承受',
+    anim:'<span class="pulse">⚔</span> <span class="shake" style="animation-delay:.2s">🩸</span>',
+    txt:'黎明前，你独行于尸骸堆积的战场。脚下是无数曾与你并肩的亡魂，空气中弥漫着铁锈与腐朽的气息。你心中升起的，是——',
+    opts:[
+      {t:'一种奇异的平静。死亡不过是另一种归宿，与活着并无本质区别。',v:{K:2,S:0}},
+      {t:'悲痛，但悲痛之后是更深的愤怒。是谁造成了这一切，我要亲手了结他。',v:{K:1,S:2}},
+      {t:'【杀害】我跪下来，将手贴在最近的一具尸体上……还有余温。',v:{K:2,S:2},dark:1},
+      {t:'【侵犯】死亡让我不再在意任何禁忌。活着的欲望需要用另一种方式证明。',v:{K:2,S:1},dark:1},
+    ]
+  },
+  {
+    id:1, dims:'欲望之焰 × 狂气深度',
+    anim:'<span class="bounce">🐇</span> <span class="spin" style="font-size:14px">⌚</span>',
+    txt:'白兔抱着怀表从你身边匆匆跑过，喃喃道："来不及了，来不及了……" 它的眼中有某种深不见底的恐惧。你会——',
+    opts:[
+      {t:'置之不理。他人的恐惧与我无关，我有自己的路要走。',v:{L:0,M:0}},
+      {t:'忍不住跟随它。好奇心比任何理智都更强烈。',v:{L:1,M:1}},
+      {t:'抓住它，逼问它在恐惧什么，要逃往何处。',v:{L:2,M:1}},
+      {t:'【杀害】兔子是很好的食材。而那块怀表——我也需要它。',v:{L:1,M:2},dark:1},
+    ]
+  },
+  {
+    id:2, dims:'羁绊执念 × 轮回意志',
+    anim:'<span class="pulse">💀</span> <span class="sway">⛓</span>',
+    txt:'你最重要的人已经死去，但据说杀死她的凶手能将她复活——那个人，是你最信赖的同伴。你会——',
+    opts:[
+      {t:'接受失去。已死之人不会希望我用另一条生命换取她。',v:{B:0,R:1}},
+      {t:'在内心痛苦挣扎许久，最终放手，带着这道伤疤继续前行。',v:{B:1,R:2}},
+      {t:'【杀害】为了她，我愿意杀死任何人，哪怕永世背负罪业。',v:{B:2,R:1},dark:1},
+      {t:'【侵犯】我找到了那个人，但我发现了比复仇更有趣的事情。',v:{B:1,R:0},dark:1},
+    ]
+  },
+  {
+    id:3, dims:'狂气深度 × 黑暗承受',
+    anim:'<span class="float">📖</span> <span class="shake" style="animation-delay:.3s">🪶</span>',
+    txt:'篝火旁，一位陌生女孩望着你说："这个世界只是一本书，我们都是被写就的角色。你所有的记忆，所有的爱恨，都只是墨水。" 你认为——',
+    opts:[
+      {t:'荒唐。哪怕是书中的角色，我的意志依然是真实的。',v:{M:0,K:0}},
+      {t:'也许吧。但即便如此，我依然要用这条命运燃烧整个故事。',v:{M:1,K:2}},
+      {t:'我早就知道了。',v:{M:2,K:2}},
+      {t:'【侵犯】那不重要。你现在坐在我旁边，这才是真实的。',v:{M:1,K:1},dark:1},
+    ]
+  },
+  {
+    id:4, dims:'杀戮本能 × 欲望之焰',
+    anim:'<span class="pulse">🔱</span> <span class="bounce" style="animation-delay:.4s">👁</span>',
+    txt:'你面前有三条路：通向无上力量但永远独行；通向平凡幸福；通向你所爱之人，但你必须永远失去关于她之外的一切记忆。',
+    opts:[
+      {t:'选择力量。孤独是我的本色，权力才是我真正需要的东西。',v:{S:2,L:2}},
+      {t:'选择幸福。哪怕是片刻虚假的温暖，也胜过永恒的黑暗。',v:{S:0,L:0}},
+      {t:'选择她，哪怕为此失去过去所有的自己。',v:{S:0,L:2}},
+      {t:'【杀害】第四条路——毁掉设计这三条路的人，自己重走一条。',v:{S:2,L:1},dark:1},
+    ]
+  },
+  {
+    id:5, dims:'轮回意志 × 羁绊执念',
+    anim:'<span class="spin">⚙</span> <span class="float" style="animation-delay:.5s">🪄</span>',
+    txt:'神明告诉你：你已轮回了数千次。你所有的爱恨情仇，都是神设计好的剧本。你与她的每一次相遇，都是神为你排演的一出戏。',
+    opts:[
+      {t:'彻底崩溃。如果一切都是虚假，那我曾经拼命保护的，算什么？',v:{R:0,B:2}},
+      {t:'冷静接受。就算如此，这一次的感情是真实存在过的。',v:{R:2,B:1}},
+      {t:'嗤之以鼻。神又如何？我照样会斩断这条命运的链条。',v:{R:2,B:0}},
+      {t:'【侵犯】那正好。如果一切都是游戏，不如好好享受游戏规则不禁止的事。',v:{R:1,B:0},dark:1},
+    ]
+  },
+  {
+    id:6, dims:'狂气深度 × 黑暗承受',
+    anim:'<span class="pulse">🪞</span> <span class="sway" style="animation-delay:.2s">👁</span>',
+    txt:'迷宫深处，镜中的自己向你伸出手，轻声说："我才是真正的你。你只是我投在这个世界的影子。"',
+    opts:[
+      {t:'砸碎镜子。我不需要任何替代品，我就是我自己。',v:{M:0,K:0}},
+      {t:'凝视许久，在那双眼睛里试图寻找某个从未面对的答案。',v:{M:2,K:1}},
+      {t:'与它谈判。看看它究竟能给我什么，需要付出什么代价。',v:{M:1,K:2}},
+      {t:'【杀害】镜中之手是冰凉的，但我依然握住了它，然后将它折断。',v:{M:2,K:2},dark:1},
+    ]
+  },
+  {
+    id:7, dims:'欲望之焰 × 羁绊执念',
+    anim:'<span class="flk">🕯</span> <span class="float" style="animation-delay:.6s">🕯</span>',
+    txt:'最后的篝火旁，所有同伴聚集在一起。你知道再踏出一步便进入无法回头的终焉之地。在这最后一夜，你想——',
+    opts:[
+      {t:'独自坐在角落，默默凝视篝火的跳动，什么也不说。',v:{L:0,B:0}},
+      {t:'对她们一一道谢，哪怕明知无法留住任何人。',v:{L:1,B:2}},
+      {t:'燃起战意，磨砺刀刃。终点的酒杯只为像我这样的人准备。',v:{L:2,B:0}},
+      {t:'【侵犯】趁着最后一夜……反正明天也许就是死亡。',v:{L:2,B:2},dark:1},
+    ]
+  },
+  {
+    id:8, dims:'杀戮本能 × 轮回意志',
+    anim:'<span class="bounce">📚</span> <span class="shake" style="animation-delay:.1s">💉</span>',
+    txt:'你打开了那本古老的童话书，发现在所有真相之下，还藏着最后一个真相——你一路上杀死的所有人的真正凶手，正是你自己。',
+    opts:[
+      {t:'合上书。有些真相，不如永远不知道。',v:{S:0,R:0}},
+      {t:'悲恸欲绝，但哭完之后，我依然会站起来，背负着这一切继续。',v:{S:0,R:2}},
+      {t:'大笑起来。这才是真正有趣的故事，不是吗？',v:{S:2,R:1}},
+      {t:'【杀害】撕碎那本书，连同写下这个故事的人一起。',v:{S:2,R:2},dark:1},
+    ]
+  },
+  {
+    id:9, dims:'狂气深度 × 轮回意志',
+    anim:'<span class="float">🌑</span> <span class="pulse" style="animation-delay:.3s">🕳</span>',
+    txt:'仙境已然崩塌，爱丽丝向你伸出手，她的眼睛空洞如深海："和我一起来吧。那里没有痛苦，没有轮回，没有记忆，也没有任何东西。"',
+    opts:[
+      {t:'接受她的手。已经太累了，就让这一切结束吧。',v:{M:1,R:0}},
+      {t:'拒绝。哪怕世界再黑暗，我要亲眼看到它真正的终点。',v:{M:0,R:2}},
+      {t:'沉默地凝视着她空洞的眼睛，轻声说：我已经在那里了。',v:{M:2,R:1}},
+      {t:'【侵犯】我握住了她的手，但我的目的，与她所说的……截然不同。',v:{M:2,R:0},dark:1},
+    ]
+  },
+];
+
+/* ---- STATE ---- */
+let st={phase:'intro',q:0,sc:{K:0,L:0,B:0,S:0,M:0,R:0},dark:0,result:null};
+let musicOn=false;
+
+/* blood drips */
+function initBlood(){
+  const c=document.getElementById('bloodTop');
+  if(!c)return;
+  for(let i=0;i<14;i++){
+    const d=document.createElement('div');
+    d.className='drop';
+    d.style.left=Math.random()*100+'%';
+    d.style.animationDuration=(.8+Math.random()*1.4)+'s';
+    d.style.animationDelay=(Math.random()*2)+'s';
+    d.style.height=Math.round(8+Math.random()*16)+'px';
+    d.style.width=(2+Math.random()*2)+'px';
+    c.appendChild(d);
+  }
+}
+
+function calcChar(){
+  if(st.dark>=7) return CHARS.find(c=>c.id==='ALICE01');
+  if(st.dark>=5) return CHARS.find(c=>c.id==='LORDE');
+  const cands=CHARS.filter(c=>c.id!=='GRIM'&&c.cond(st.sc));
+  return cands[0]||CHARS.find(c=>c.id==='GRIM');
+}
+
+function imgUrl(fn){
+  return BASE+encodeURIComponent(fn);
+}
+
+function buildImgGallery(imgs){
+  if(!imgs||!imgs.length) return '';
+  const main=imgs.find(i=>i.main)||imgs[0];
+  const sides=imgs.filter(i=>!i.main);
+  let html=`<div class="char-gallery">`;
+  html+=`<div class="char-img-wrap main-img"><img class="char-img" src="${imgUrl(main.f)}" onerror="this.parentNode.innerHTML='<div class=\\'no-img\\'><div class=\\'ascii-art\\'>?</div></div>'" loading="lazy"></div>`;
+  sides.forEach(s=>{
+    html+=`<div class="char-img-wrap side-img"><img class="char-img" src="${imgUrl(s.f)}" onerror="this.style.display='none'" loading="lazy"></div>`;
+  });
+  html+=`</div>`;
+  return html;
+}
+
+function flipTo(htmlFn){
+  const page=document.getElementById('page');
+  page.classList.add('flip-out');
+  setTimeout(()=>{
+    page.classList.remove('flip-out');
+    const inner=document.getElementById('inner');
+    inner.innerHTML=htmlFn();
+    page.classList.add('flip-in');
+    setTimeout(()=>page.classList.remove('flip-in'),700);
+    window.scrollTo({top:0,behavior:'smooth'});
+  },640);
+}
+
+/* ---- RENDER ---- */
+function renderIntro(){
+  return `
+<div class="logo-wrap">
+  <div class="px-strip">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+  <div class="logo-main" style="margin-top:14px">BLACK SOULS</div>
+  <div class="logo-sub">人格测试 ∙ 黑童话特供版</div>
+  <div class="hdiv"></div>
+</div>
+<div class="fm">
+  <span class="c c-tl">✦</span><span class="c c-tr">✦</span><span class="c c-bl">✦</span><span class="c c-br">✦</span>
+  <div class="spd">♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠</div>
+  <div class="intro-p">
+    欢迎来到这个被遗忘的仙境。<br>
+    这里的童话早已腐朽，神明冷眼旁观，<br>
+    而你，不过是无数轮回中又一个点燃篝火的旅人。<br><br>
+    <em>10道题目 ∙ 6个维度 ∙ 15位黑童话中的灵魂</em><br><br>
+    <span style="color:#1e0c06;font-size:11px">本测试仅供娱乐，含有黑暗向内容，请谨慎游玩。</span><br>
+    <span style="color:#1e0c06;font-size:11px">右下角 ♪ 可控制背景音乐。</span>
+  </div>
+  <div class="spd">♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠</div>
+  <button class="btn-start" onclick="startTest()"><span class="flk">🕯</span>&nbsp;&nbsp;点燃篝火，开始轮回&nbsp;&nbsp;<span class="flk">🕯</span></button>
+</div>
+<div class="px-strip">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>`;
+}
+
+function renderQ(){
+  const q=QS[st.q];
+  const pct=Math.round(st.q/QS.length*100);
+  const opts=q.opts.map((o,i)=>`
+    <button class="opt${o.dark?' dark':''}" onclick="doAnswer(${i})" ${o.dark?'style="color:#2a0e04;border-color:#150a04"':''}>
+      ${o.dark?'<span class="dk-mark" style="color:#440800;margin-right:4px">▌</span>':''}${o.t}
+    </button>`).join('');
+  return `
+<div class="prog-wrap">
+  <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+  <div class="prog-txt">${st.q+1} / ${QS.length} ∙ ${q.dims}</div>
+</div>
+<div class="fm">
+  <span class="c c-tl">✦</span><span class="c c-tr">✦</span><span class="c c-bl">✦</span><span class="c c-br">✦</span>
+  <div class="q-anim">${q.anim}</div>
+  <div class="q-num">【第 ${String(st.q+1).padStart(2,'0')} 题】</div>
+  <div class="q-txt">${q.txt}</div>
+  <div class="opts">${opts}</div>
+</div>
+<div style="font-size:10px;color:#160806;text-align:center;letter-spacing:2px;margin-top:6px">「每一个选择，都会成为你灵魂的一部分」</div>`;
+}
+
+function renderResult(){
+  const ch=st.result;
+  const MAX=20;
+  const bars=DIMS.map(d=>{
+    const v=Math.min(st.sc[d.id]||0,MAX);
+    const p=Math.round(v/MAX*100);
+    return `<div class="dim-row">
+      <div class="dim-name">${d.name}</div>
+      <div class="dim-bg"><div class="dim-fill" id="df_${d.id}"></div></div>
+      <div class="dim-pct" id="dp_${d.id}">0%</div>
+    </div>`;
+  }).join('');
+
+  const descHtml=ch.desc.map(p=>{
+    if(p.includes('\n'))return p.split('\n').map((l,i)=>i===0?`<p>${l}</p>`:`<p style="padding-left:8px;color:#4a2a12">${l}</p>`).join('');
+    return `<p>${p}</p>`;
+  }).join('');
+
+  return `
+<div class="res-wrap" style="text-align:center">
+  <div class="px-strip">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+  <div style="font-size:10px;letter-spacing:6px;color:#2a1006;margin:10px 0 2px">∙ 你的黑之灵魂 ∙</div>
+  <div class="res-name">${ch.name}</div>
+  <div class="res-title">${ch.title}</div>
+  ${buildImgGallery(ch.imgs)}
+  <div class="hdiv"></div>
+  <div class="fm" style="text-align:left">
+    <span class="c c-tl">✦</span><span class="c c-tr">✦</span><span class="c c-bl">✦</span><span class="c c-br">✦</span>
+    <div class="res-desc">${descHtml}</div>
+    <div class="res-desc quote" style="border-left:2px solid #440000;padding-left:10px;color:#5a2a12;font-size:11.5px;font-style:italic">「${ch.quote}」</div>
+    <div class="tags">${ch.tags.map(t=>`<span class="tag">♠ ${t}</span>`).join('')}</div>
+  </div>
+  <div class="fm">
+    <span class="c c-tl">✦</span><span class="c c-tr">✦</span><span class="c c-bl">✦</span><span class="c c-br">✦</span>
+    <div style="font-size:10px;letter-spacing:4px;color:#2a1006;margin-bottom:10px;text-align:center">∙ 六维灵魂分析 ∙</div>
+    ${bars}
+  </div>
+  <div class="spd">♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠ ♠</div>
+  <button class="btn-sm" onclick="doReset()">↺ 再次轮回</button>
+  <div class="px-strip" style="margin-top:12px">▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</div>
+</div>`;
+}
+
+/* ---- ACTIONS ---- */
+function startTest(){
+  flipTo(()=>{st.phase='quiz';st.q=0;return renderQ();});
+}
+function doAnswer(i){
+  const q=QS[st.q];
+  const o=q.opts[i];
+  if(o.dark) st.dark++;
+  for(const[d,v] of Object.entries(o.v)) st.sc[d]=(st.sc[d]||0)+v;
+  st.q++;
+  if(st.q>=QS.length){
+    st.result=calcChar();
+    st.phase='result';
+    flipTo(()=>renderResult());
+    setTimeout(animateBars,900);
+  } else {
+    flipTo(()=>renderQ());
+  }
+}
+function doReset(){
+  st={phase:'intro',q:0,sc:{K:0,L:0,B:0,S:0,M:0,R:0},dark:0,result:null};
+  flipTo(()=>renderIntro());
+}
+function animateBars(){
+  const MAX=20;
+  DIMS.forEach(d=>{
+    const v=Math.min(st.sc[d.id]||0,MAX);
+    const p=Math.round(v/MAX*100);
+    const el=document.getElementById('df_'+d.id);
+    const el2=document.getElementById('dp_'+d.id);
+    if(el){el.style.width=p+'%';}
+    if(el2){el2.textContent=p+'%';}
+  });
+}
+
+/* ---- MUSIC ---- */
+function toggleMusic(){
+  const a=document.getElementById('bgm');
+  const b=document.getElementById('mBtn');
+  if(!a.src||a.readyState===0){
+    a.src=BGM;
+    a.volume=0.45;
+    a.load();
+  }
+  musicOn=!musicOn;
+  if(musicOn){
+    a.play().catch(()=>{});
+    b.classList.add('on');
+    spawnNotes();
+  } else {
+    a.pause();
+    b.classList.remove('on');
+  }
+}
+function spawnNotes(){
+  if(!musicOn)return;
+  const notes=['♩','♪','♫','♬'];
+  const n=document.createElement('div');
+  n.className='note';
+  n.textContent=notes[Math.floor(Math.random()*notes.length)];
+  n.style.bottom='50px';
+  n.style.right=(14+Math.random()*40)+'px';
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(),2600);
+  setTimeout(spawnNotes,1200+Math.random()*1000);
+}
+
+/* ---- INIT ---- */
+document.getElementById('inner').innerHTML=renderIntro();
+initBlood();
+</script>
